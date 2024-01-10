@@ -7,7 +7,7 @@ var cors = require('cors')
 // const locals = require("./middleware/siteTitle");
 const appRouters = require("./routers/users-routers");
 
-const PORT = process.env.POSTGRES_URL;
+const PORT = process.env.SERVER_PORT;
 
 const app = express();
 
