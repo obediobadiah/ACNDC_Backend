@@ -14,10 +14,10 @@ const app = express();
 // allows to use POST and GET json from our endpoints
 app.use(cors())
 app.use(express.json());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(bodyParser.json({ limit: '500mb' }));
-// app.use(bodyParser.urlencoded({ extended: true, limit: '500mb' }));
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '500mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '500mb' }));
 
 app.use('/images/actuality', express.static('images/actuality'));
 app.use('/images/rapports', express.static('images/rapports'));

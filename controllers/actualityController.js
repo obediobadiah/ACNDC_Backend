@@ -47,20 +47,15 @@ const getActualityById = (req, res) => {
 const addActuality = (req, res) => {
   const { title, description, link } = req.body;
   const imageFile = req.file;
-  try {
-    if (Object.keys(req.body).length === 0) {
-      res.status(400).send('Request body is empty');
-      return;
-    }
-    pool.query(UsersQueries.addActuality, [title, description, link, imageFile.path], (error, results) => {
-      if (error) throw error;
-      res.status(200).send("actuality Created Successfully");
-
-    });
-  } catch (error) {
-    console.error(error);
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).send('Request body is empty');
+    return;
   }
+  pool.query(UsersQueries.addActuality, [title, description, link, imageFile.path], (error, results) => {
+    if (error) throw error;
+    res.status(200).send("actuality Created Successfully");
 
+  });
 };
 
 
@@ -82,7 +77,7 @@ const updateActuality = (req, res) => {
   const id = parseInt(req.params.id);
   const { title, description, link } = req.body;
   let imagePath = '';
-
+  
   if (req.file) {
     imagePath = req.file.path;
   }
