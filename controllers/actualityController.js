@@ -44,17 +44,16 @@ const getActualityById = (req, res) => {
   });
 };
 
-const addActuality = (req, res) => {
+const addActuality = async (req, res) => {
   const { title, description, link } = req.body;
   const imageFile = req.file;
   if (Object.keys(req.body).length === 0) {
     res.status(400).send('Request body is empty');
     return;
   }
-  pool.query(UsersQueries.addActuality, [title, description, link, imageFile.path], (error, results) => {
+  await pool.query(UsersQueries.addActuality, [title, description, link, imageFile.path], (error, results) => {
     if (error) throw error;
     res.status(200).send("actuality Created Successfully");
-
   });
 };
 
