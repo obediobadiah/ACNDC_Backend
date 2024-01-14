@@ -68,6 +68,7 @@ const addActuality = async (req, res) => {
     if (error) throw error;
     res.status(200).send("actuality Created Successfully");
   });
+}
 
 
 // const updateActuality = (req, res) => {
