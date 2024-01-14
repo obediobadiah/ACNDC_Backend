@@ -6,16 +6,17 @@ const multer = require('multer');
 
 const router = Router();
 
-const fileStorage = multer.diskStorage({
-    destination:function(req, image, cb){
-      return cb(null, './images/actuality/')
-    },
-    filename: function (req, image, cd){
-      return cd(null, `${Date.now()}_${image.originalname}`)
-    }
-  })
-  
-const upload = multer({ storage: fileStorage})
+// const fileStorage = multer.diskStorage({
+//     destination:function(req, image, cb){
+//       return cb(null, './images/actuality/')
+//     },
+//     filename: function (req, image, cd){
+//       return cd(null, `${Date.now()}_${image.originalname}`)
+//     }
+//   })
+  // uploading the images to server using Multer middleware
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // router.use(overrideMethod);
 router.get("/get-users", usersController.getUsers);
@@ -30,17 +31,13 @@ router.get("/get-actuality-count", actualityController.getCountActuality);
 router.get("/get-actuality", actualityController.getActuality);
 router.get("/get-actuality/:title", actualityController.getActualityByTitle);
 router.get("/get-actuality-id/:id", actualityController.getActualityById);
-// router.post("/add-actuality/", upload.single('image') , (req, res) => {
-//     console.log(req.body);
-//     console.log(req.file)
-// });
-router.post("/add-actuality/", upload.single('image') , (req, res) => {
-  res.json({ filePath: req.file.path });
-});
-// router.post("/add-actuality/", upload.single('image') , actualityController.addActuality);
+router.post("/add-actuality/",upload.single('image'), actualityController.addActuality);
 router.post("/add-actuality-id/:id", actualityController.AddActualityById);
 router.post("/delete-actuality/:id", actualityController.deleteActuality);
-router.post("/update-actuality/:id", upload.single('image'),actualityController.updateActuality);
+router.post("/update-actuality/:id",actualityController.updateActuality);
+// router.post('/test-upload', upload.single('image'), (req, res) => {
+//     res.json({ filePath: req.file.path });
+//   });
 // router.post("/auth-users/", usersController.authUsers);
 
 module.exports = router;
