@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const { link } = require("../routers/users-routers");
 const multer = require('multer');
 const fs = require('fs');
+const sharp = require('sharp');
 
 
 
@@ -18,22 +19,69 @@ const getCountActuality = (req, res) => {
   });
 };
 
-const getActuality = (req, res) => {
-  pool.query(UsersQueries.getActuality, (error, results) => {
-    const combinedData = results.rows.map((row) => {
-      const imageBuffer = row.image;
-      const imageString = imageBuffer ? imageBuffer.toString('base64') : null;
-
-      return {
-        ...row,
-        image: imageString,
-      };
-    });
-    res.status(200).json(combinedData);
-
-  });
-
+const resizeImage = async (imageBuffer, maxWidth, maxHeight) => {
+  try {
+    const resizedImageBuffer = await sharp(imageBuffer)
+      .resize({
+        width: maxWidth,
+        height: maxHeight,
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
+      .toBuffer();
+    return resizedImageBuffer;
+  } catch (error) {
+    console.error('Error resizing image:', error);
+    return null;
+  }
 };
+
+const getActuality = (req, res) => {
+  pool.query(UsersQueries.getActuality, async (error, results) => {
+    if (error) {
+      console.error('Error fetching actuality:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    try {
+      const resizedDataPromises = results.rows.map(async (row) => {
+        const imageBuffer = row.image;
+        const resizedImageBuffer = await resizeImage(imageBuffer, 500, 500);
+        const imageString = resizedImageBuffer ? resizedImageBuffer.toString('base64') : null;
+
+        return {
+          ...row,
+          image: imageString,
+        };
+      });
+
+      const resizedData = await Promise.all(resizedDataPromises);
+      
+      res.status(200).json(resizedData);
+    } catch (error) {
+      console.error('Error resizing images:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+};
+
+// const getActuality = (req, res) => {
+//   pool.query(UsersQueries.getActuality, (error, results) => {
+//     const combinedData = results.rows.map((row) => {
+//       const imageBuffer = row.image;
+//       const imageString = imageBuffer ? imageBuffer.toString('base64') : null;
+
+//       return {
+//         ...row,
+//         image: imageString,
+//       };
+//     });
+//     res.status(200).json(combinedData);
+
+//   });
+
+// };
 
 const getActualityByTitle = (req, res) => {
   const title = req.params.title;
