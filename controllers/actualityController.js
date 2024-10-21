@@ -7,6 +7,7 @@ const { link } = require("../routers/users-routers");
 const multer = require('multer');
 const fs = require('fs');
 const sharp = require('sharp');
+const nodemailer = require('nodemailer');
 
 
 
@@ -166,6 +167,35 @@ const getActualityBySlug = (req, res) => {
   });
 };
 
+const sendEmail = async (req, res) => {
+  const { from_name, from_email, message } = req.body;
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: from_email,
+      to: process.env.EMAIL_USER,  // Your receiving email address
+      subject: `New Newsletter from ${from_name}`,
+      text: `Name: ${from_name}\nEmail: ${from_email}\nMessage: ${message}`
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent: ' + info.response);
+    res.status(200).json({ message: "Email sent successfully" });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ message: "Failed to send email" });
+  }
+};
+
 
 module.exports = {
   getCountActuality,
@@ -177,4 +207,5 @@ module.exports = {
   deleteActuality,
   updateActuality,
   getActualityBySlug,
+  sendEmail,
 };
