@@ -106,7 +106,7 @@ const getActualityById = (req, res) => {
 
 
 const addActuality = async (req, res) => {
-  const { title, description, link } = req.body;
+  const { title, description, link, content } = req.body;
   const imageFile = req.file;
   const binaryImage = imageFile.buffer
 
@@ -119,29 +119,12 @@ const addActuality = async (req, res) => {
     res.status(400).send('Request body is empty');
     return;
   }
-  pool.query(UsersQueries.addActuality, [title, description, link, binaryImage, slug], (error, results) => {
+  pool.query(UsersQueries.addActuality, [title, description, link, binaryImage, slug, content], (error, results) => {
     if (error) throw error;
     res.status(200).send("actuality Created Successfully");
-    const actuality_id = results.rows[0].id;
-    res.status(200).json({ actuality_id });
   });
 };
 
-
-
-// const updateActuality = (req, res) => {
-//   const id = parseInt(req.params.id);
-//   const { title, description, link } = req.body;
-//   const imageFile = req.file;
-//   if (Object.keys(req.body).length === 0) {
-//     res.status(400).send('Request body is empty');
-//     return;
-//   }
-//   pool.query(UsersQueries.UpdateActuality, [title, description, link, imageFile.path, id], (error, results) => {
-//     if (error) throw error;
-//     res.status(200).send("Actuality Created Successfully");
-//   });
-// };
 
 const updateActuality = (req, res) => {
   const id = parseInt(req.params.id);
@@ -205,22 +188,6 @@ const getActualityBySlug = (req, res) => {
   });
 };
 
-const addActualityContent = (req, res) => {
-  const { actuality_id, reactQuillvalue } = req.body;
-
-  if (!actuality_id || !reactQuillvalue) {
-    res.status(400).send("Actuality ID and content are required");
-    return;
-  }
-  pool.query(UsersQueries.addActualityContent, [actuality_id, reactQuillvalue], (error, results) => {
-    if (error) {
-      console.error("Error saving actuality content:", error);
-      res.status(500).send("Server error");
-      return;
-    }
-    res.status(200).send("Content saved successfully");
-  });
-};
 
 module.exports = {
   getCountActuality,
@@ -232,6 +199,5 @@ module.exports = {
   deleteActuality,
   updateActuality,
   getActualityBySlug,
-  addActualityContent,
   // authUsers,
 };
