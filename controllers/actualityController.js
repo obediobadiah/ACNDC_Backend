@@ -106,7 +106,7 @@ const getActualityById = (req, res) => {
 
 
 const addActuality = async (req, res) => {
-  const { title, description, link } = req.body;
+  const { title, description, link, content} = req.body;
   const imageFile = req.file;
   const binaryImage = imageFile.buffer
 
@@ -119,7 +119,7 @@ const addActuality = async (req, res) => {
     res.status(400).send('Request body is empty');
     return;
   }
-  pool.query(UsersQueries.addActuality, [title, description, link, binaryImage, slug], (error, results) => {
+  pool.query(UsersQueries.addActuality, [title, description, link, binaryImage, slug, content], (error, results) => {
     if (error) throw error;
     res.status(200).send("actuality Created Successfully");
     const actuality_id = results.rows[0].id;
