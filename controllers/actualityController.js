@@ -122,6 +122,8 @@ const addActuality = async (req, res) => {
   pool.query(UsersQueries.addActuality, [title, description, link, binaryImage, slug], (error, results) => {
     if (error) throw error;
     res.status(200).send("actuality Created Successfully");
+    const actuality_id = results.rows[0].id;
+    res.status(200).json({ actuality_id });
   });
 };
 

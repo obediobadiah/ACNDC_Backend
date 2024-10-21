@@ -20,7 +20,7 @@ const UpdateActuality = "UPDATE actuality SET title = $1 , description = $2, lin
 const UpdateActualityWithoutImage = "UPDATE actuality SET title = $1 , description = $2, link = $3, slug = $4 WHERE id = $5"
 const getActualityBySlug = "SELECT * FROM actuality WHERE slug = $1"
 
-const addActualityContent = "INSERT INTO actuality_content (content) VALUES ($1)"
+const addActualityContent = "INSERT INTO actuality_content (actuality_id, content) VALUES ($1, $2)";
 
 module.exports = {
     getUsers,
