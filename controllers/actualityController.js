@@ -204,18 +204,12 @@ const sendEmail = async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('Email sent to website owner');
-
     await transporter.sendMail(autoReplyOptions);
-    console.log('Auto-reply sent to user');
 
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent: ' + info.response);
-    res.status(200).json({ message: "Email sent successfully" });
+    res.status(200).send("Email sent successfully");
   } catch (error) {
     console.error('Error sending email:', error);
-    res.status(500).json({ message: "Failed to send email" });
+    res.status(500).json("Failed to send email");
   }
 };
 
