@@ -57,7 +57,7 @@ const getActuality = (req, res) => {
       });
 
       const resizedData = await Promise.all(resizedDataPromises);
-      
+
       res.status(200).json(resizedData);
     } catch (error) {
       console.error('Error resizing images:', error);
@@ -93,6 +93,7 @@ const getActualityByTitle = (req, res) => {
   });
 };
 
+
 const getActualityById = (req, res) => {
   const id = parseInt(req.params.id);
   pool.query(UsersQueries.getActualityById, [id], (error, results) => {
@@ -103,20 +104,27 @@ const getActualityById = (req, res) => {
   });
 };
 
+
 const addActuality = async (req, res) => {
   const { title, description, link } = req.body;
   const imageFile = req.file;
   const binaryImage = imageFile.buffer
 
+  const slug = title
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^\w\-]+/g, '');
+
   if (Object.keys(req.body).length === 0) {
     res.status(400).send('Request body is empty');
     return;
   }
-  pool.query(UsersQueries.addActuality, [title, description, link, binaryImage], (error, results) => {
+  pool.query(UsersQueries.addActuality, [title, description, link, binaryImage, slug], (error, results) => {
     if (error) throw error;
     res.status(200).send("actuality Created Successfully");
   });
-}
+};
+
 
 
 // const updateActuality = (req, res) => {
@@ -146,7 +154,12 @@ const updateActuality = (req, res) => {
     return;
   }
 
-  const queryArgs = req.file ? [title, description, link, imagePath, id] : [title, description, link, id];
+  const slug = title
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^\w\-]+/g, '');
+
+  const queryArgs = req.file ? [title, description, link, imagePath, slug, id] : [title, description, slug, link, id];
   const queryToExecute = req.file ? UsersQueries.UpdateActuality : UsersQueries.UpdateActualityWithoutImage;
   pool.query(queryToExecute, queryArgs, (error, results) => {
     if (error) throw error;
@@ -160,7 +173,6 @@ const AddActualityById = (req, res) => {
   pool.query(UsersQueries.AddActualityById, [id], (error, results) => {
     if (error) throw error;
     res.status(200).send("actuality Diplicated Successfully");
-
   });
 };
 
@@ -180,6 +192,34 @@ const deleteActuality = (req, res) => {
   });
 };
 
+
+const getActualityBySlug = (req, res) => {
+  const { slug } = req.params;
+  pool.query(UsersQueries.getActualityBySlug, [slug], (error, results) => {
+    if (error) throw error;
+    res
+      .status(200)
+      .json(results.rows);
+  });
+};
+
+const addActualityContent = (req, res) => {
+  const { actuality_id, reactQuillvalue } = req.body;
+
+  if (!actuality_id || !reactQuillvalue) {
+    res.status(400).send("Actuality ID and content are required");
+    return;
+  }
+  pool.query(UsersQueries.addActualityContent, [actuality_id, reactQuillvalue], (error, results) => {
+    if (error) {
+      console.error("Error saving actuality content:", error);
+      res.status(500).send("Server error");
+      return;
+    }
+    res.status(200).send("Content saved successfully");
+  });
+};
+
 module.exports = {
   getCountActuality,
   getActuality,
@@ -189,5 +229,7 @@ module.exports = {
   AddActualityById,
   deleteActuality,
   updateActuality,
+  getActualityBySlug,
+  addActualityContent,
   // authUsers,
 };
