@@ -102,7 +102,7 @@ const addActuality = async (req, res) => {
     res.status(400).send('Request body is empty');
     return;
   }
-  pool.query(UsersQueries.addActuality, [title, description, link, binaryImage, slug, content], (error, results) => {
+  pool.query(UsersQueries.addActuality, [title, description, binaryImage, slug, content], (error, results) => {
     if (error) throw error;
     res.status(200).send("actuality Created Successfully");
   });
@@ -112,10 +112,8 @@ const addActuality = async (req, res) => {
 const updateActuality = (req, res) => {
   const id = parseInt(req.params.id);
   const { title, description, content } = req.body;
-  let imagePath = '';
-  if (req.file) {
-    imagePath = req.file.path;
-  }
+  const imageFile = req.file;
+  const binaryImage = imageFile.buffer
 
   const slug = title
     .toLowerCase()
@@ -126,7 +124,7 @@ const updateActuality = (req, res) => {
     res.status(400).send('Request body is empty');
     return;
   }
-  pool.query(UsersQueries.UpdateActuality, [title, description, imagePath, slug, content, id], (error, results) => {
+  pool.query(UsersQueries.UpdateActuality, [title, description, binaryImage, slug, content, id], (error, results) => {
     if (error) throw error;
     res.status(200).send("Actuality Created Successfully");
   });
