@@ -8,6 +8,7 @@ const multer = require('multer');
 const fs = require('fs');
 const sharp = require('sharp');
 const nodemailer = require('nodemailer');
+const path = require('path');
 
 
 
@@ -178,7 +179,7 @@ const sendEmail = async (req, res) => {
     htmlTemplate = htmlTemplate.replace('{{from_name}}', from_name);
     htmlTemplate = htmlTemplate.replace('{{from_email}}', from_email);
     htmlTemplate = htmlTemplate.replace('{{message}}', message);
-    
+
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
@@ -191,9 +192,23 @@ const sendEmail = async (req, res) => {
     const mailOptions = {
       from: from_email,
       to: process.env.EMAIL_USER,
-      subject: `New Newsletter from ${from_name}`,
+      subject: `Lettre D'information [ ACNDC - ${from_name} ]`,
       text: htmlTemplate,
     };
+
+    const autoReplyOptions = {
+      from: process.env.EMAIL_USER,
+      to: from_email,
+      subject: `Lettre D'information [ACNDC]`,
+      text: `Cher/Chère ${from_name},\n\nMerci de nous avoir contacté ! Nous avons bien reçu votre message et nous vous répondrons dans les plus brefs délais.\n\nCordialement,\nAction pour la Conservation de la Nature et Developement Communautaire`
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Email sent to website owner');
+
+    await transporter.sendMail(autoReplyOptions);
+    console.log('Auto-reply sent to user');
+
 
     const info = await transporter.sendMail(mailOptions);
     console.log('Email sent: ' + info.response);
