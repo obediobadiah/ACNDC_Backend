@@ -130,7 +130,6 @@ const updateActuality = (req, res) => {
   const id = parseInt(req.params.id);
   const { title, description, link, content } = req.body;
   let imagePath = '';
-
   if (req.file) {
     imagePath = req.file.path;
   }
@@ -144,8 +143,8 @@ const updateActuality = (req, res) => {
     res.status(400).send('Request body is empty');
     return;
   }
-  
-  const queryArgs = req.file ? [title, description, link, imagePath, slug, content, id] : [title, description, slug, link, content, id];
+
+  const queryArgs = req.file ? [title, description, imagePath, slug, content, id] : [title, description, slug, content, id];
   const queryToExecute = req.file ? UsersQueries.UpdateActuality : UsersQueries.UpdateActualityWithoutImage;
   pool.query(queryToExecute, queryArgs, (error, results) => {
     if (error) throw error;
