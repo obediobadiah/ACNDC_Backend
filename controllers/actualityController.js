@@ -171,6 +171,14 @@ const sendEmail = async (req, res) => {
   const { from_name, from_email, message } = req.body;
 
   try {
+
+    const templatePath = path.join(__dirname, '../templates/emailTemplate.html');
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+
+    htmlTemplate = htmlTemplate.replace('{{from_name}}', from_name);
+    htmlTemplate = htmlTemplate.replace('{{from_email}}', from_email);
+    htmlTemplate = htmlTemplate.replace('{{message}}', message);
+    
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
@@ -182,9 +190,9 @@ const sendEmail = async (req, res) => {
 
     const mailOptions = {
       from: from_email,
-      to: process.env.EMAIL_USER,  // Your receiving email address
+      to: process.env.EMAIL_USER,
       subject: `New Newsletter from ${from_name}`,
-      text: `Name: ${from_name}\nEmail: ${from_email}\nMessage: ${message}`
+      text: htmlTemplate,
     };
 
     const info = await transporter.sendMail(mailOptions);
