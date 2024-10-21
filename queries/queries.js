@@ -16,8 +16,8 @@ const addActuality = "INSERT INTO actuality (title, description, link, image, sl
 // const addActualityTest = "INSERT INTO actuality_test (title, description, link, image) VALUES ($1, $2, $3, $4)"
 const AddActualityById = "INSERT INTO actuality (title, description, link, image) SELECT title, description, link, image FROM actuality WHERE id = $1";
 const deleteActuality = "DELETE FROM actuality WHERE id = $1";
-const UpdateActuality = "UPDATE actuality SET title = $1 , description = $2, link = $3, image = $4, slug = $5 WHERE id = $6"
-const UpdateActualityWithoutImage = "UPDATE actuality SET title = $1 , description = $2, link = $3, slug = $4 WHERE id = $5"
+const UpdateActuality = "UPDATE actuality SET title = $1 , description = $2, image = $3, slug = $4, content = $5 WHERE id = $6"
+const UpdateActualityWithoutImage = "UPDATE actuality SET title = $1 , description = $2, link = $3, slug = $4, content = $5 WHERE id = $6"
 const getActualityBySlug = "SELECT * FROM actuality WHERE slug = $1"
 
 module.exports = {
