@@ -128,7 +128,7 @@ const addActuality = async (req, res) => {
 
 const updateActuality = (req, res) => {
   const id = parseInt(req.params.id);
-  const { title, description, link, content } = req.body;
+  const { title, description, content } = req.body;
   let imagePath = '';
   if (req.file) {
     imagePath = req.file.path;
@@ -199,5 +199,4 @@ module.exports = {
   deleteActuality,
   updateActuality,
   getActualityBySlug,
-  // authUsers,
 };
