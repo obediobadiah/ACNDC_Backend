@@ -193,7 +193,7 @@ const sendEmail = async (req, res) => {
       from: from_email,
       to: process.env.EMAIL_USER,
       subject: `Lettre D'information [ ACNDC - ${from_name} ]`,
-      text: htmlTemplate,
+      html: htmlTemplate,
     };
 
     const autoReplyOptions = {
