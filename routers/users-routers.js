@@ -35,6 +35,9 @@ router.post("/add-actuality/",upload.single('image'), actualityController.addAct
 router.post("/add-actuality-id/:id", actualityController.AddActualityById);
 router.post("/delete-actuality/:id", actualityController.deleteActuality);
 router.post("/update-actuality/:id",actualityController.updateActuality);
+
+router.post("/add-actuality-content", actualityController.addActualityContent);
+
 // router.post('/test-upload', upload.single('image'), (req, res) => {
 //     res.json({ filePath: req.file.path });
 //   });
