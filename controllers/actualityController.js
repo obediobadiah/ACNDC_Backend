@@ -106,7 +106,7 @@ const getActualityById = (req, res) => {
 
 
 const addActuality = async (req, res) => {
-  const { title, description, link, content} = req.body;
+  const { title, description, link, content } = req.body;
   const imageFile = req.file;
   const binaryImage = imageFile.buffer
 
@@ -134,16 +134,17 @@ const updateActuality = (req, res) => {
   if (req.file) {
     imagePath = req.file.path;
   }
-  if (Object.keys(req.body).length === 0) {
-    res.status(400).send('Request body is empty');
-    return;
-  }
 
   const slug = title
     .toLowerCase()
     .replace(/\s+/g, '_')
     .replace(/[^\w\-]+/g, '');
 
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).send('Request body is empty');
+    return;
+  }
+  
   const queryArgs = req.file ? [title, description, link, imagePath, slug, content, id] : [title, description, slug, link, content, id];
   const queryToExecute = req.file ? UsersQueries.UpdateActuality : UsersQueries.UpdateActualityWithoutImage;
   pool.query(queryToExecute, queryArgs, (error, results) => {
