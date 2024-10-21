@@ -20,7 +20,7 @@
         }
 
         .header {
-            text-align: center;
+            text-align: left;
             color: #333;
         }
 
@@ -35,7 +35,7 @@
 
         .footer {
             margin-top: 30px;
-            text-align: center;
+            text-align: left;
             font-size: 12px;
             color: #999;
         }
@@ -44,20 +44,23 @@
             background-color: #ccffe3;
             padding: 50px;
             margin: 50px 0;
-            text-align: center;
+            text-align: left;
         }
 
         .footer_follow_intro h1 {
             color: #286f4e;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 10px 0;
             font-size: 2rem;
+        }
+
+        .footer_follow_intro a {
+            font-size: 1rem;
         }
 
         .footer_follow_intro h2 {
             color: #286f4e;
             font-size: 1.2rem;
-            margin-bottom: 10px;
         }
 
         .footer_social_links {
@@ -88,6 +91,7 @@
             color: #ccffe3;
             transition: color 0.3s ease;
         }
+
         @media (max-width: 768px) {
             .footer_follow_us {
                 padding: 30px;
@@ -124,15 +128,17 @@
             <h1>New Newsletter Submission</h1>
         </div>
         <div class="content">
-            <p>Hello ACNDC,</p>
-            <p>Mon nom c'est: <strong>{{from_name}}</strong></p>
+            <p>Bonjour ACNDC,</p>
             <p>{{message}}</p>
+            <p>Cordialement,</p>
+            <p>{{from_name}}</p>
         </div>
         <div class="footer">
             <div className="footer_follow_us">
                 <div className="footer_follow_intro">
                     <h2>Voulez-vous savoir plus sur nous?</h2>
                     <h1>Restez Connecter Avec Nous:</h1>
+                    <a href="acndc.org">ACNDC Website</a>
 
                     <div className="footer_social_links">
                         <a href="https://web.facebook.com/acndc.org" className="footer_social_icon"
