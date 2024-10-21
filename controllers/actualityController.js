@@ -66,23 +66,6 @@ const getActuality = (req, res) => {
   });
 };
 
-// const getActuality = (req, res) => {
-//   pool.query(UsersQueries.getActuality, (error, results) => {
-//     const combinedData = results.rows.map((row) => {
-//       const imageBuffer = row.image;
-//       const imageString = imageBuffer ? imageBuffer.toString('base64') : null;
-
-//       return {
-//         ...row,
-//         image: imageString,
-//       };
-//     });
-//     res.status(200).json(combinedData);
-
-//   });
-
-// };
-
 const getActualityByTitle = (req, res) => {
   const title = req.params.title;
   pool.query(UsersQueries.getActualityByTitle, [title], (error, results) => {
@@ -143,10 +126,7 @@ const updateActuality = (req, res) => {
     res.status(400).send('Request body is empty');
     return;
   }
-
-  const queryArgs = req.file ? [title, description, imagePath, slug, content, id] : [title, description, slug, content, id];
-  const queryToExecute = req.file ? UsersQueries.UpdateActuality : UsersQueries.UpdateActualityWithoutImage;
-  pool.query(queryToExecute, queryArgs, (error, results) => {
+  pool.query(UsersQueries.UpdateActuality, [title, description, imagePath, slug, content, id], (error, results) => {
     if (error) throw error;
     res.status(200).send("Actuality Created Successfully");
   });
