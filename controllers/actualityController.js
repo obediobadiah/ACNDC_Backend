@@ -180,6 +180,13 @@ const sendEmail = async (req, res) => {
     htmlTemplate = htmlTemplate.replace('{{from_email}}', from_email);
     htmlTemplate = htmlTemplate.replace('{{message}}', message);
 
+    const autoReplyPath = path.join(__dirname, '../templates/emailAutoReply.html');
+    let autoReplyTemplate = fs.readFileSync(autoReplyPath, 'utf8');
+
+    autoReplyTemplate = autoReplyTemplate.replace('{{from_name}}', from_name);
+    autoReplyTemplate = autoReplyTemplate.replace('{{from_email}}', from_email);
+    autoReplyTemplate = autoReplyTemplate.replace('{{message}}', message);
+
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
@@ -200,7 +207,7 @@ const sendEmail = async (req, res) => {
       from: process.env.EMAIL_USER,
       to: from_email,
       subject: `Lettre D'information [ACNDC]`,
-      text: `Cher/Chère ${from_name},\n\nMerci de nous avoir contacté ! Nous avons bien reçu votre message et nous vous répondrons dans les plus brefs délais.\n\nCordialement,\nAction pour la Conservation de la Nature et Developement Communautaire`
+      html: autoReplyTemplate,
     };
 
     await transporter.sendMail(mailOptions);
