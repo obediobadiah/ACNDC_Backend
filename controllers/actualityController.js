@@ -91,7 +91,7 @@ const getActualityById = (req, res) => {
 
 
 const addActuality = async (req, res) => {
-  const { title, description, link, content } = req.body;
+  const { title, description, content } = req.body;
   const imageFile = req.file;
   const binaryImage = imageFile.buffer
 
