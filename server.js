@@ -4,10 +4,11 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 var cors = require('cors')
+const pool = require('./db');
 // const locals = require("./middleware/siteTitle");
 const appRouters = require("./routers/users-routers");
 
-const PORT = process.env.SERVER_PORT;
+const PORT = process.env.SERVER_PORT || 5001;
 
 const app = express();
 
@@ -26,6 +27,62 @@ app.use('/images/rapports', express.static('images/rapports'));
 
 // app.use(locals);
 app.use("/api", appRouters);
-app.listen(PORT, () =>
-  console.log(`✅ server is running on http://localhost:${PORT} 🚀`)
-);
+
+// Initialize donations table and test database connection
+async function initializeDatabase() {
+    try {
+        console.log('🔍 Testing database connection...');
+        
+        // Test database connection
+        await pool.query('SELECT NOW()');
+        console.log('✅ Database connection successful');
+        
+        // Create donations table if it doesn't exist
+        const createTableQuery = `
+            CREATE TABLE IF NOT EXISTS donations (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                country VARCHAR(255),
+                organization VARCHAR(255),
+                phone VARCHAR(50),
+                donation_mode VARCHAR(50) NOT NULL,
+                amount DECIMAL(10, 2) NOT NULL,
+                payment_method VARCHAR(50) NOT NULL,
+                payment_detail TEXT NOT NULL,
+                terms_accepted BOOLEAN NOT NULL DEFAULT false,
+                status VARCHAR(50) NOT NULL DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            
+            CREATE INDEX IF NOT EXISTS idx_donations_email ON donations(email);
+            CREATE INDEX IF NOT EXISTS idx_donations_status ON donations(status);
+            CREATE INDEX IF NOT EXISTS idx_donations_created_at ON donations(created_at);
+        `;
+        
+        await pool.query(createTableQuery);
+        console.log('✅ Donations table initialized successfully');
+        
+    } catch (error) {
+        console.error('❌ Database initialization failed:', error.message);
+    }
+}
+
+// Test route
+app.get('/api/test', (req, res) => {
+    res.json({ 
+        message: 'API is working!',
+        timestamp: new Date().toISOString(),
+        port: PORT
+    });
+});
+
+// Initialize database and start server
+initializeDatabase().then(() => {
+    app.listen(PORT, () =>
+        console.log(`✅ Server is running on http://localhost:${PORT} 🚀`)
+    );
+}).catch(error => {
+    console.error('❌ Failed to start server:', error);
+});

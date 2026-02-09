@@ -20,6 +20,13 @@ const UpdateActuality = "UPDATE actuality SET title = $1 , description = $2, ima
 // const UpdateActualityWithoutImage = "UPDATE actuality SET title = $1 , description = $2, slug = $3, content = $4 WHERE id = $5"
 const getActualityBySlug = "SELECT * FROM actuality WHERE slug = $1"
 
+// Donation queries
+const getDonations = "SELECT * FROM donations ORDER BY created_at DESC";
+const getDonationsById = "SELECT * FROM donations WHERE id = $1";
+const addDonation = "INSERT INTO donations (name, email, country, organization, phone, donation_mode, amount, payment_method, payment_detail, terms_accepted, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *";
+const updateDonationStatus = "UPDATE donations SET status = $1 WHERE id = $2";
+const deleteDonation = "DELETE FROM donations WHERE id = $1";
+
 module.exports = {
     getUsers,
     getUsersById,
@@ -41,4 +48,11 @@ module.exports = {
     getActualityBySlug,
     // addActualityTest,
     // getActualityTest,
+
+    // Donation queries
+    getDonations,
+    getDonationsById,
+    addDonation,
+    updateDonationStatus,
+    deleteDonation,
 }

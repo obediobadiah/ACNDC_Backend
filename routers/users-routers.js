@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const usersController = require("../controllers/usersController");
 const actualityController = require("../controllers/actualityController");
+const donationController = require("../controllers/donationController");
 const multer = require('multer');
 // const overrideMethod = require("../middleware/overrideMethod");
 
@@ -38,6 +39,13 @@ router.post("/update-actuality/:id",upload.single('image'), actualityController.
 
 
 router.post("/send-email/", actualityController.sendEmail);
+
+// Donation routes
+router.get("/donations", donationController.getDonations);
+router.get("/donations/:id", donationController.getDonationsById);
+router.post("/donations", donationController.addDonation);
+router.put("/donations/:id/status", donationController.updateDonationStatus);
+router.delete("/donations/:id", donationController.deleteDonation);
 
 // router.post('/test-upload', upload.single('image'), (req, res) => {
 //     res.json({ filePath: req.file.path });
