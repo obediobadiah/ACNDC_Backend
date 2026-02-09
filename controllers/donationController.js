@@ -1,5 +1,5 @@
 const pool = require("../db");
-const donationQueries = require('../queries/queries');
+const { donationQueries } = require('../queries/queries');
 
 const getDonations = (req, res) => {
     pool.query(donationQueries.getDonations, (error, results) => {

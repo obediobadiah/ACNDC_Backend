@@ -38,7 +38,7 @@ async function initializeDatabase() {
         console.log('✅ Database connection successful');
         
         // Create donations table if it doesn't exist
-        const createTableQuery = `
+        const createDonationsTableQuery = `
             CREATE TABLE IF NOT EXISTS donations (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
@@ -61,8 +61,42 @@ async function initializeDatabase() {
             CREATE INDEX IF NOT EXISTS idx_donations_created_at ON donations(created_at);
         `;
         
-        await pool.query(createTableQuery);
+        await pool.query(createDonationsTableQuery);
         console.log('✅ Donations table initialized successfully');
+        
+        // Create newsletter subscribers table if it doesn't exist
+        const createNewsletterTableQuery = `
+            CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+                id SERIAL PRIMARY KEY,
+                email VARCHAR(255) NOT NULL UNIQUE,
+                name VARCHAR(255),
+                message TEXT,
+                status VARCHAR(50) NOT NULL DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            
+            CREATE INDEX IF NOT EXISTS idx_newsletter_email ON newsletter_subscribers(email);
+            CREATE INDEX IF NOT EXISTS idx_newsletter_status ON newsletter_subscribers(status);
+            CREATE INDEX IF NOT EXISTS idx_newsletter_created_at ON newsletter_subscribers(created_at);
+            
+            CREATE OR REPLACE FUNCTION update_newsletter_updated_at_column()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                NEW.updated_at = CURRENT_TIMESTAMP;
+                RETURN NEW;
+            END;
+            $$ language 'plpgsql';
+            
+            DROP TRIGGER IF EXISTS update_newsletter_subscribers_updated_at ON newsletter_subscribers;
+            CREATE TRIGGER update_newsletter_subscribers_updated_at 
+                BEFORE UPDATE ON newsletter_subscribers 
+                FOR EACH ROW 
+                EXECUTE FUNCTION update_newsletter_updated_at_column();
+        `;
+        
+        await pool.query(createNewsletterTableQuery);
+        console.log('✅ Newsletter subscribers table initialized successfully');
         
     } catch (error) {
         console.error('❌ Database initialization failed:', error.message);
