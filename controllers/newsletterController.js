@@ -49,37 +49,71 @@ const addSubscriber = (req, res) => {
         return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    // Set default status
-    const status = 'active';
-
-    pool.query(
-        newsletterQueries.addSubscriber, 
-        [email.toLowerCase().trim(), name || null, message || null, status], 
-        (error, results) => {
-            if (error) {
-                console.error('Database error adding newsletter subscriber:', error);
-                
-                // Check if it's a duplicate email error
-                if (error.code === '23505') {
-                    return res.status(409).json({ 
-                        error: 'Email already subscribed',
-                        details: 'This email address is already subscribed to the newsletter'
-                    });
-                }
-                
-                return res.status(500).json({ 
-                    error: 'Database error',
-                    details: error.message 
-                });
-            }
-            
-            console.log('Newsletter subscriber added successfully:', results.rows[0]);
-            res.status(201).json({
-                message: 'Successfully subscribed to newsletter',
-                subscriber: results.rows[0]
+    // First check if email already exists
+    pool.query(newsletterQueries.getSubscriberByEmail, [email.toLowerCase().trim()], (error, results) => {
+        if (error) {
+            console.error('Database error checking existing subscriber:', error);
+            return res.status(500).json({ 
+                error: 'Database error',
+                details: error.message 
             });
         }
-    );
+
+        if (results.rows.length > 0) {
+            // Email exists, update the subscriber
+            const existingSubscriber = results.rows[0];
+            const updateData = {
+                name: name || existingSubscriber.name,
+                message: message || existingSubscriber.message,
+                status: 'active' // Reactivate the subscription
+            };
+
+            pool.query(
+                'UPDATE newsletter_subscribers SET name = $1, message = $2, status = $3, updated_at = CURRENT_TIMESTAMP WHERE email = $4 RETURNING *',
+                [updateData.name, updateData.message, updateData.status, email.toLowerCase().trim()],
+                (updateError, updateResults) => {
+                    if (updateError) {
+                        console.error('Error updating existing subscriber:', updateError);
+                        return res.status(500).json({ 
+                            error: 'Database error',
+                            details: updateError.message 
+                        });
+                    }
+
+                    console.log('Newsletter subscriber updated successfully:', updateResults.rows[0]);
+                    res.status(200).json({
+                        message: 'Subscription updated successfully',
+                        subscriber: updateResults.rows[0],
+                        action: 'updated'
+                    });
+                }
+            );
+        } else {
+            // Email doesn't exist, create new subscriber
+            const status = 'active';
+
+            pool.query(
+                newsletterQueries.addSubscriber, 
+                [email.toLowerCase().trim(), name || null, message || null, status], 
+                (error, results) => {
+                    if (error) {
+                        console.error('Database error adding newsletter subscriber:', error);
+                        return res.status(500).json({ 
+                            error: 'Database error',
+                            details: error.message 
+                        });
+                    }
+                    
+                    console.log('Newsletter subscriber added successfully:', results.rows[0]);
+                    res.status(201).json({
+                        message: 'Successfully subscribed to newsletter',
+                        subscriber: results.rows[0],
+                        action: 'created'
+                    });
+                }
+            );
+        }
+    });
 };
 
 // Update newsletter subscriber status
