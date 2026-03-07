@@ -1,5 +1,5 @@
 const pool = require("../db");
-const UsersQueries = require('../queries/queries')
+const { actualityQueries } = require('../queries/queries');
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
@@ -13,7 +13,7 @@ const path = require('path');
 
 
 const getCountActuality = (req, res) => {
-  pool.query(UsersQueries.getCountActuality, (error, results) => {
+  pool.query(actualityQueries.getCountActuality, (error, results) => {
     if (error) throw error;
     res
       .status(200)
@@ -39,7 +39,7 @@ const resizeImage = async (imageBuffer, maxWidth, maxHeight) => {
 };
 
 const getActuality = (req, res) => {
-  pool.query(UsersQueries.getActuality, async (error, results) => {
+  pool.query(actualityQueries.getActuality, async (error, results) => {
     if (error) {
       console.error('Error fetching actuality:', error);
       res.status(500).json({ error: 'Internal Server Error' });
@@ -47,30 +47,48 @@ const getActuality = (req, res) => {
     }
 
     try {
-      const resizedDataPromises = results.rows.map(async (row) => {
-        const imageBuffer = row.image;
-        const resizedImageBuffer = await resizeImage(imageBuffer, 500, 500);
-        const imageString = resizedImageBuffer ? resizedImageBuffer.toString('base64') : null;
-
-        return {
-          ...row,
-          image: imageString,
-        };
+      const processedDataPromises = results.rows.map(async (row) => {
+        try {
+          // Check if image exists and is valid
+          if (row.image && Buffer.isBuffer(row.image)) {
+            const resizedImageBuffer = await resizeImage(row.image, 500, 500);
+            const imageString = resizedImageBuffer ? resizedImageBuffer.toString('base64') : null;
+            
+            return {
+              ...row,
+              image: imageString,
+            };
+          } else {
+            // Return row without image processing if image is null or invalid
+            return {
+              ...row,
+              image: null,
+            };
+          }
+        } catch (imageError) {
+          console.error('Error processing image for row:', row.id, imageError);
+          // Return row without image if processing fails
+          return {
+            ...row,
+            image: null,
+          };
+        }
       });
 
-      const resizedData = await Promise.all(resizedDataPromises);
+      const processedData = await Promise.all(processedDataPromises);
 
-      res.status(200).json(resizedData);
+      res.status(200).json(processedData);
     } catch (error) {
-      console.error('Error resizing images:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error('Error processing actuality data:', error);
+      // Return raw data if processing fails
+      res.status(200).json(results.rows);
     }
   });
 };
 
 const getActualityByTitle = (req, res) => {
   const title = req.params.title;
-  pool.query(UsersQueries.getActualityByTitle, [title], (error, results) => {
+  pool.query(actualityQueries.getActualityByTitle, [title], (error, results) => {
     if (error) throw error;
     res
       .status(200)
@@ -81,7 +99,7 @@ const getActualityByTitle = (req, res) => {
 
 const getActualityById = (req, res) => {
   const id = parseInt(req.params.id);
-  pool.query(UsersQueries.getActualityById, [id], (error, results) => {
+  pool.query(actualityQueries.getActualityById, [id], (error, results) => {
     if (error) throw error;
     res
       .status(200)
@@ -104,7 +122,7 @@ const addActuality = async (req, res) => {
     res.status(400).send('Request body is empty');
     return;
   }
-  pool.query(UsersQueries.addActuality, [title, description, binaryImage, slug, content], (error, results) => {
+  pool.query(actualityQueries.addActuality, [title, description, binaryImage, slug, content], (error, results) => {
     if (error) throw error;
     res.status(200).send("actuality Created Successfully");
   });
@@ -126,7 +144,7 @@ const updateActuality = (req, res) => {
     res.status(400).send('Request body is empty');
     return;
   }
-  pool.query(UsersQueries.UpdateActuality, [title, description, binaryImage, slug, content, id], (error, results) => {
+  pool.query(actualityQueries.UpdateActuality, [title, description, binaryImage, slug, content, id], (error, results) => {
     if (error) throw error;
     res.status(200).send("Actuality Created Successfully");
   });
@@ -135,7 +153,7 @@ const updateActuality = (req, res) => {
 
 const AddActualityById = (req, res) => {
   const id = parseInt(req.params.id);
-  pool.query(UsersQueries.AddActualityById, [id], (error, results) => {
+  pool.query(actualityQueries.AddActualityById, [id], (error, results) => {
     if (error) throw error;
     res.status(200).send("actuality Diplicated Successfully");
   });
@@ -143,13 +161,13 @@ const AddActualityById = (req, res) => {
 
 const deleteActuality = (req, res) => {
   const id = parseInt(req.params.id);
-  pool.query(UsersQueries.getActualityById, [id], (error, results) => {
+  pool.query(actualityQueries.getActualityById, [id], (error, results) => {
     const noUserFound = !results.rows.length;
     if (noUserFound) {
       res.send("The actuality does not exist");
     }
     else {
-      pool.query(UsersQueries.deleteActuality, [id], (error, results) => {
+      pool.query(actualityQueries.deleteActuality, [id], (error, results) => {
         if (error) throw error;
         res.status(200).send("actuality Deleted Successfully");
       });
@@ -160,7 +178,7 @@ const deleteActuality = (req, res) => {
 
 const getActualityBySlug = (req, res) => {
   const { slug } = req.params;
-  pool.query(UsersQueries.getActualityBySlug, [slug], (error, results) => {
+  pool.query(actualityQueries.getActualityBySlug, [slug], (error, results) => {
     if (error) throw error;
     res
       .status(200)
