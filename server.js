@@ -8,7 +8,7 @@ const pool = require('./db');
 // const locals = require("./middleware/siteTitle");
 const appRouters = require("./routers/users-routers");
 
-const PORT = process.env.SERVER_PORT || 5001;
+const PORT = process.env.SERVER_PORT || 5000;
 
 const app = express();
 
