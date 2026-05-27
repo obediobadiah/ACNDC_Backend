@@ -4,6 +4,33 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 var cors = require('cors')
+
+const allowedOrigins = [
+  'http://localhost:4000',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:8080',
+  'http://127.0.0.1:4000',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001',
+  'https://www.acndc.org',
+  'https://acndc.org'
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (e.g. curl, Postman, server-to-server)
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS: ' + origin));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+};
 const pool = require('./db');
 // const locals = require("./middleware/siteTitle");
 const appRouters = require("./routers/users-routers");
@@ -13,7 +40,10 @@ const PORT = process.env.SERVER_PORT || 5000;
 const app = express();
 
 // allows to use POST and GET json from our endpoints
-app.use(cors())
+// Handle preflight OPTIONS requests for all routes
+app.options('*', cors(corsOptions));
+// Apply CORS to all routes
+app.use(cors(corsOptions))
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
